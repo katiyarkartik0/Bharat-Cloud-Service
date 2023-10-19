@@ -1,0 +1,26 @@
+.input-error{
+  background-color: red;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.password-container {
+  position: relative;
+}
+/* Customize the file input button */
+.input-field-file{
+  display: none;
+}
+
+/* Style the profile picture upload button */
+.uploadButtonLabel {
+  display: block;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #5f27cd;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+}

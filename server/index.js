@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const { authRoutes } = require("./routes/auth");
 // const { taskRoutes } = require("./routes/task");
 const { verifyToken } = require("./middleware/verifyToken");
+const { repositoryRoutes } = require("./routes/repository");
 const routes = express.Router();
 
 dotenv.config();
@@ -20,7 +21,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-// app.use("/api/tasks", verifyToken, taskRoutes);
+app.use("/api/repository", verifyToken, repositoryRoutes);
 
 mongoose
   .connect(process.env.MONGO_URL, {

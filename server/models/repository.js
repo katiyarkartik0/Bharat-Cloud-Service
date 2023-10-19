@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const repositorySchema = mongoose.Schema(
   {
     name: { type: String, required: true },
-    description: { type: String },
+    description: { type: String, required: true },
     documents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }],
     accessType: {
       type: String,

@@ -1,0 +1,42 @@
+/* Loader container */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* height: 100vh; */
+}
+
+/* Dot styles */
+.dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #007bff; /* Change the color as needed */
+  margin: 0 8px;
+}
+
+/* Animation for dot1 */
+.dot1 {
+  animation: bounce 1s infinite ease-in-out;
+}
+
+/* Animation for dot2 */
+.dot2 {
+  animation: bounce 1s infinite ease-in-out 0.2s;
+}
+
+/* Animation for dot3 */
+.dot3 {
+  animation: bounce 1s infinite ease-in-out 0.4s;
+}
+
+/* Keyframes for animation */
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}

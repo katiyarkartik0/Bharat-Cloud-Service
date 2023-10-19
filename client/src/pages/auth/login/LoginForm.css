@@ -1,0 +1,35 @@
+.form{
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  
+  .input-field {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+  
+  .input-field-error {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid red;
+    border-radius: 5px;
+  }
+  .input-error{
+    background-color: red;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+  }
+  
+  .show-hide {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
