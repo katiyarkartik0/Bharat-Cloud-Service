@@ -85,7 +85,7 @@ const getRepositories = async (req, res) => {
     );
     return res.status(200).json({ repositories });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({ msg: JSON.stringify(error) });
   }
 };
@@ -175,4 +175,27 @@ const updateRepository = async (req, res) => {
   }
 };
 
-module.exports = { createRepository, updateRepository, getRepositories };
+const deleteRepository = async (req, res) => {
+  if (req.verified == false) {
+    return res.status(403).send(req.msg);
+  }
+  const { repositoryId } = req.params;
+  if (!repositoryId) {
+    return res.send(400).json({ msg: "Please send a valid repository id" });
+  }
+  try {
+    await Repository.deleteOne({ _id: repositoryId });
+    return res
+      .status(200)
+      .json({ msg: "Repository has been deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ msg: JSON.stringify(error) });
+  }
+};
+
+module.exports = {
+  createRepository,
+  updateRepository,
+  getRepositories,
+  deleteRepository,
+};
