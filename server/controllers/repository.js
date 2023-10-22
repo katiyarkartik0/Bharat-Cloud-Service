@@ -1,79 +1,11 @@
+const {
+  validateSharedAccessUsers,
+  validateCustomTags,
+  extractNonEmptyValidInputs,
+} = require("../helpers/reposAndDocs");
 const { Validator } = require("../helpers/validator");
 const Repository = require("../models/repository");
 const User = require("../models/user");
-
-const validateSharedAccessUsers = ({ sharedAccessUsers }) => {
-  const { inputValidation } = new Validator();
-  for (let i = 0; i < sharedAccessUsers.length; i++) {
-    const { isInputValid, msg: inputValidationErrorMsg } = inputValidation({
-      email: sharedAccessUsers[i],
-    });
-    if (!isInputValid) {
-      return { isInputValid, msg: inputValidationErrorMsg };
-    }
-  }
-  return {
-    isInputValid: true,
-  };
-};
-
-const validateCustomTags = ({ customTags }) => {
-  const { inputValidation } = new Validator();
-
-  for (let i = 0; i < customTags.length; i++) {
-    const { isInputValid, msg: inputValidationErrorMsg } = inputValidation({
-      tag: customTags[i],
-    });
-    if (!isInputValid) {
-      return { isInputValid, msg: inputValidationErrorMsg };
-    }
-  }
-  return {
-    isInputValid: true,
-  };
-};
-
-const extractNonEmptyValidInputs = ({
-  repositoryId,
-  name,
-  description,
-  accessType,
-  sharedAccessUsers,
-  customTags,
-}) => {
-  let nonEmptyValidInputs = {};
-  if (repositoryId) {
-    nonEmptyValidInputs = { ...nonEmptyValidInputs, repositoryId };
-  }
-  if (name) {
-    nonEmptyValidInputs = { ...nonEmptyValidInputs, name };
-  }
-  if (description) {
-    nonEmptyValidInputs = { ...nonEmptyValidInputs, description };
-  }
-  if (accessType) {
-    nonEmptyValidInputs = { ...nonEmptyValidInputs, accessType };
-  }
-  if (sharedAccessUsers) {
-    const { isInputValid, msg: inputValidationErrorMsg } =
-      validateSharedAccessUsers({ sharedAccessUsers });
-    if (!isInputValid) {
-      return { isInputValid, inputValidationErrorMsg };
-    }
-    nonEmptyValidInputs = { ...nonEmptyValidInputs, sharedAccessUsers };
-  }
-  if (customTags) {
-    const { isInputValid, msg: inputValidationErrorMsg } = validateCustomTags({
-      customTags,
-    });
-    if (!isInputValid) {
-      return { isInputValid, inputValidationErrorMsg };
-    }
-    nonEmptyValidInputs = { ...nonEmptyValidInputs, customTags };
-  }
-
-  return { isInputValid: true, nonEmptyValidInputs };
-};
 
 const getRepositories = async (req, res) => {
   if (req.verified == false) {
@@ -90,13 +22,29 @@ const getRepositories = async (req, res) => {
   }
 };
 
+const getRepository = async (req, res) => {
+  if (req.verified == false) {
+    return res.status(403).send(req.msg);
+  }
+  const { repositoryId } = req.params;
+  if (!repositoryId) {
+    return res.send(400).json({ msg: "Please send a valid repository id" });
+  }
+  try {
+    const repository = await Repository.findOne({ _id: repositoryId });
+    return res.status(200).json({ repository });
+  } catch (error) {
+    return res.status(500).json({ msg: JSON.stringify(error) });
+  }
+};
+
 const createRepository = async (req, res) => {
   if (req.verified == false) {
     return res.status(403).send(req.msg);
   }
   const {
     name,
-    description,
+    description = `A ${name} repository.`,
     accessType = "public",
     sharedAccessUsers = [],
     customTags = [],
@@ -105,8 +53,6 @@ const createRepository = async (req, res) => {
   const { inputValidation } = new Validator();
   const { isInputValid, msg: inputValidationErrorMsg } = inputValidation({
     name,
-    description: description ? description : `A ${name} repository.`,
-    accessType,
   });
   if (!isInputValid) {
     return res.status(400).json({ msg: inputValidationErrorMsg });
@@ -179,12 +125,17 @@ const deleteRepository = async (req, res) => {
   if (req.verified == false) {
     return res.status(403).send(req.msg);
   }
+  const userId = req.id;
   const { repositoryId } = req.params;
   if (!repositoryId) {
     return res.send(400).json({ msg: "Please send a valid repository id" });
   }
   try {
     await Repository.deleteOne({ _id: repositoryId });
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { repositories: repositoryId } }
+    );
     return res
       .status(200)
       .json({ msg: "Repository has been deleted successfully" });
@@ -194,6 +145,7 @@ const deleteRepository = async (req, res) => {
 };
 
 module.exports = {
+  getRepository,
   createRepository,
   updateRepository,
   getRepositories,

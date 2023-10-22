@@ -104,6 +104,52 @@ const validateCustomTags = ({ customTags }) => {
   };
 };
 
+const extractNonEmptyValidInputs = ({
+  repositoryId,
+  documentId,
+  name,
+  description,
+  accessType,
+  sharedAccessUsers,
+  customTags,
+}) => {
+  let nonEmptyValidInputs = {};
+  if (repositoryId) {
+    nonEmptyValidInputs = { ...nonEmptyValidInputs, repositoryId };
+  }
+  if (documentId) {
+    nonEmptyValidInputs = { ...nonEmptyValidInputs, documentId };
+  }
+  if (name) {
+    nonEmptyValidInputs = { ...nonEmptyValidInputs, name };
+  }
+  if (description) {
+    nonEmptyValidInputs = { ...nonEmptyValidInputs, description };
+  }
+  if (accessType) {
+    nonEmptyValidInputs = { ...nonEmptyValidInputs, accessType };
+  }
+  if (sharedAccessUsers) {
+    const { isInputValid, msg: inputValidationErrorMsg } =
+      validateSharedAccessUsers({ sharedAccessUsers });
+    if (!isInputValid) {
+      return { isInputValid, inputValidationErrorMsg };
+    }
+    nonEmptyValidInputs = { ...nonEmptyValidInputs, sharedAccessUsers };
+  }
+  if (customTags) {
+    const { isInputValid, msg: inputValidationErrorMsg } = validateCustomTags({
+      customTags,
+    });
+    if (!isInputValid) {
+      return { isInputValid, inputValidationErrorMsg };
+    }
+    nonEmptyValidInputs = { ...nonEmptyValidInputs, customTags };
+  }
+
+  return { isInputValid: true, nonEmptyValidInputs };
+};
+
 module.exports = {
   getAllDocuments,
   getFilteredDocuments,
@@ -111,4 +157,5 @@ module.exports = {
   getAllRepositoriesAndDocumentIds,
   validateSharedAccessUsers,
   validateCustomTags,
+  extractNonEmptyValidInputs,
 };
