@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { authRoutes } = require("./routes/auth");
-// const { taskRoutes } = require("./routes/task");
 const { verifyToken } = require("./middleware/verifyToken");
 const { repositoryRoutes } = require("./routes/repository");
 const { searchRoutes } = require("./routes/search");
