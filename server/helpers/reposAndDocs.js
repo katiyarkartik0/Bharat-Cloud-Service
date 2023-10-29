@@ -69,7 +69,7 @@ const getFilteredDocuments = ({ allDocuments, keywords }) =>
     );
   });
 
-const validateSharedAccessUsers = ({ sharedAccessUsers }) => {
+const validateSharedAccessUsers = ({ sharedAccessUsers,accessType }) => {
   if (accessType === "shared" && sharedAccessUsers.length > 0) {
     const { inputValidation } = new Validator();
     for (let i = 0; i < sharedAccessUsers.length; i++) {
@@ -77,12 +77,12 @@ const validateSharedAccessUsers = ({ sharedAccessUsers }) => {
         email: sharedAccessUsers[i],
       });
       if (!isInputValid) {
-        return { isInputValid, msg: inputValidationErrorMsg };
+        return { isSharedAccessValid:isInputValid, msg: inputValidationErrorMsg };
       }
     }
   }
   return {
-    isInputValid: true,
+    isSharedAccessValid: true,
   };
 };
 
@@ -95,12 +95,12 @@ const validateCustomTags = ({ customTags }) => {
         tag: customTags[i],
       });
       if (!isInputValid) {
-        return { isInputValid, msg: inputValidationErrorMsg };
+        return { isCustomTagsValid:isInputValid, msg: inputValidationErrorMsg };
       }
     }
   }
   return {
-    isInputValid: true,
+    isCustomTagsValid: true,
   };
 };
 

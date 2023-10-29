@@ -8,6 +8,7 @@ const { authRoutes } = require("./routes/auth");
 const { verifyToken } = require("./middleware/verifyToken");
 const { repositoryRoutes } = require("./routes/repository");
 const { searchRoutes } = require("./routes/search");
+const { documentRoutes } = require("./routes/document");
 const routes = express.Router();
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/repository", verifyToken, repositoryRoutes);
+app.use("/api/document", verifyToken, documentRoutes);
 app.use("/api/search",verifyToken,searchRoutes)
 
 mongoose

@@ -58,17 +58,17 @@ const createRepository = async (req, res) => {
     return res.status(400).json({ msg: inputValidationErrorMsg });
   }
   if (accessType === "shared" && sharedAccessUsers.length > 0) {
-    const { isInputValid, msg: inputValidationErrorMsg } =
-      validateSharedAccessUsers({ sharedAccessUsers });
-    if (!isInputValid) {
+    const { isSharedAccessValid, msg: inputValidationErrorMsg } =
+      validateSharedAccessUsers({ sharedAccessUsers,accessType });
+    if (!isSharedAccessValid) {
       return res.status(400).json({ msg: inputValidationErrorMsg });
     }
   }
   if (customTags.length > 0) {
-    const { isInputValid, msg: inputValidationErrorMsg } = validateCustomTags({
+    const { isCustomTagsValid, msg: inputValidationErrorMsg } = validateCustomTags({
       customTags,
     });
-    if (!isInputValid) {
+    if (!isCustomTagsValid) {
       return res.status(400).json({ msg: inputValidationErrorMsg });
     }
   }

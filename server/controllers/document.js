@@ -1,4 +1,4 @@
-const { putObjectUrl } = require("../helpers/AWS");
+const { putObjectUrl, getObjectUrl, deleteObject } = require("../helpers/AWS");
 const {
   validateSharedAccessUsers,
   validateCustomTags,
@@ -66,7 +66,7 @@ const createDocument = async (req, res) => {
   }
 
   const { isSharedAccessValid, msg: isSharedAccessValidError } =
-    validateSharedAccessUsers({ sharedAccessUsers });
+    validateSharedAccessUsers({ sharedAccessUsers, accessType });
   if (!isSharedAccessValid) {
     return res.status(400).json({ msg: isSharedAccessValidError });
   }
@@ -74,6 +74,7 @@ const createDocument = async (req, res) => {
   const { isCustomTagsValid, msg: isCustomTagsValidError } = validateCustomTags(
     { customTags }
   );
+
   if (!isCustomTagsValid) {
     return res.status(400).json({ msg: isCustomTagsValidError });
   }
@@ -89,22 +90,28 @@ const createDocument = async (req, res) => {
       name,
       version: latestVersion + 1,
       description,
-      uploadedFile,
+      uploadedFile: { fileName, contentType },
       accessType,
       sharedAccessUsers,
       customTags,
     });
+
     const { _id: documentId } = await newDocument.save();
     await Repository.findOneAndUpdate(
       { _id: repositoryId },
       { $push: { documents: documentId } }
     );
-    const preSignedPUTUrl = await putObjectUrl({ fileName, contentType });
+    const preSignedPUTUrl = await putObjectUrl({
+      fileName,
+      documentId,
+      contentType,
+    });
     return res.status(200).json({
       preSignedPUTUrl,
       msg: "Document created and added Successfully!",
     });
   } catch (error) {
+
     return res.status(500).json({
       msg: JSON.stringify(error),
     });
@@ -136,22 +143,49 @@ const deleteDocument = async (req, res) => {
   if (req.verified == false) {
     return res.status(403).send(req.msg);
   }
-  const userId = req.id;
-  const { documentId } = req.params;
+  const { fileName, documentId,repositoryId } = req.body;
   if (!documentId) {
     return res.send(400).json({ msg: "Please send a valid documentId id" });
   }
   try {
-    await Document.deleteOne({ _id: documentId });
+    await deleteObject({ fileName, documentId });//deleting object from AWS S3
+
+    await Document.deleteOne({ _id: documentId });//deleting object from database
+
     await Repository.findOneAndUpdate(
-      { _id: userId },
+      { _id: repositoryId },
       { $pull: { documents: documentId } }
-    );
+    );// updating documentIds array after popping out deleted documentId
+
     return res
       .status(200)
       .json({ msg: "Document has been deleted successfully" });
   } catch (error) {
     return res.status(500).json({ msg: JSON.stringify(error) });
+  }
+};
+const viewDocument = async (req, res) => {
+  if (req.verified == false) {
+    return res.status(403).send(req.msg);
+  }
+  const { fileName, documentId } = req.query;
+  try {
+    const preSignedGETUrl = await getObjectUrl({ fileName, documentId });
+    res.status(200).json(preSignedGETUrl);
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
+const downloadDocument = async (req, res) => {
+  if (req.verified == false) {
+    return res.status(403).send(req.msg);
+  }
+  const { fileName, documentId } = req.query;
+  try {
+    const preSignedGETUrl = await getObjectUrl({ fileName, documentId });
+    res.status(200).json(preSignedGETUrl);
+  } catch (error) {
+    res.status(400).json(error);
   }
 };
 
@@ -161,4 +195,6 @@ module.exports = {
   getDocuments,
   updateDocument,
   deleteDocument,
+  viewDocument,
+  downloadDocument,
 };

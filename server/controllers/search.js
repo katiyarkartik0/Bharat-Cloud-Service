@@ -17,8 +17,8 @@ const search = async (req, res) => {
   try {
     if (userIds.length > 0 && keywords.length > 0) {
       //if request contains userIds and keywords, then
-      //we are fetching all the repositories from userIds with *authorized-access, then
-      //we are fetching all the documents from documentIds with *authorized-access,then
+      //we are fetching all the repositories from userIds with *authorized-access to userId, then
+      //we are fetching all the documents from documentIds with *authorized-access to userId,then
       //we are filtering repositories on the basis of keywords inside keywords array, and
       //we are filtering documnets on the basis of keywords inside keywords array
 
