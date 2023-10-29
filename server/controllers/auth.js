@@ -6,7 +6,6 @@ const { Validator } = require("../helpers/validator");
 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
-  console.log(req.body)
   const validator = new Validator();
   const { getUser, inputValidation } = validator;
   const { isInputValid, msg: inputValidationErrorMsg } = inputValidation({

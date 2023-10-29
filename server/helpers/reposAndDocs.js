@@ -3,35 +3,37 @@ const User = require("../models/user");
 const { Validator } = require("./validator");
 
 const getAllRepositoriesAndDocumentIds = async ({ userIds, userId }) => {
-  const allRepositories = [];
-  const allDocumentIds = [];
-  userIds.forEach(async (currentUserId) => {
+  let allRepositories = [];
+  let allDocumentIds = [];
+
+  for (const currentUserId of userIds) {
     const { repositories } = await User.findOne({
       _id: currentUserId,
     }).populate("repositories");
 
     if (currentUserId === userId) {
       allRepositories = [...allRepositories, ...repositories];
-      repositories.forEach(({ documentIds }) => {
-        allDocumentIds = [...allDocumentIds, ...documentIds];
+
+      repositories.forEach(({ documents }) => {
+        allDocumentIds = [...allDocumentIds, ...documents];
       });
     } else if (currentUserId !== userId) {
       const validRepositories = repositories.filter(
-        ({ accessType, sharedAccessUsers, documentIds }) =>
+        ({ accessType, sharedAccessUsers, documents }) =>
           accessType !== "private" &&
           (accessType === "public" || sharedAccessUsers.includes(userId)) &&
-          (allDocumentIds = [...allDocumentIds, ...documentIds])
+          (allDocumentIds = [...allDocumentIds, ...documents])
       );
       allRepositories = [...allRepositories, ...validRepositories];
     }
-  });
+  }
   return { allRepositories, allDocumentIds };
 };
 
-const getAllDocuments = async ({ documentIds, userId }) => {
+const getAllDocuments = async ({ documents, userId }) => {
   const allDocuments = [];
 
-  documentIds.forEach(async (documentId) => {
+  for(const documentId of documents){
     const document = await Document.findOne({
       _id: documentId,
     });
@@ -42,7 +44,20 @@ const getAllDocuments = async ({ documentIds, userId }) => {
     ) {
       allDocuments = [...allDocuments, document];
     }
-  });
+  }
+
+  // documents.forEach(async (documentId) => {
+  //   const document = await Document.findOne({
+  //     _id: documentId,
+  //   });
+  //   const { accessType, sharedAccessUsers } = document;
+  //   if (
+  //     accessType !== "private" &&
+  //     (accessType === "public" || sharedAccessUsers.includes(userId))
+  //   ) {
+  //     allDocuments = [...allDocuments, document];
+  //   }
+  // });
 
   return allDocuments;
 };
@@ -69,7 +84,7 @@ const getFilteredDocuments = ({ allDocuments, keywords }) =>
     );
   });
 
-const validateSharedAccessUsers = ({ sharedAccessUsers,accessType }) => {
+const validateSharedAccessUsers = ({ sharedAccessUsers, accessType }) => {
   if (accessType === "shared" && sharedAccessUsers.length > 0) {
     const { inputValidation } = new Validator();
     for (let i = 0; i < sharedAccessUsers.length; i++) {
@@ -77,7 +92,10 @@ const validateSharedAccessUsers = ({ sharedAccessUsers,accessType }) => {
         email: sharedAccessUsers[i],
       });
       if (!isInputValid) {
-        return { isSharedAccessValid:isInputValid, msg: inputValidationErrorMsg };
+        return {
+          isSharedAccessValid: isInputValid,
+          msg: inputValidationErrorMsg,
+        };
       }
     }
   }
@@ -95,7 +113,10 @@ const validateCustomTags = ({ customTags }) => {
         tag: customTags[i],
       });
       if (!isInputValid) {
-        return { isCustomTagsValid:isInputValid, msg: inputValidationErrorMsg };
+        return {
+          isCustomTagsValid: isInputValid,
+          msg: inputValidationErrorMsg,
+        };
       }
     }
   }

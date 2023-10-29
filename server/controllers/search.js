@@ -12,7 +12,7 @@ const search = async (req, res) => {
     return res.status(403).send(req.msg);
   }
   const userId = req.id;
-  const { userIds, keywords } = req.body;
+  const { userIds=[], keywords=[] } = req.body;
 
   try {
     if (userIds.length > 0 && keywords.length > 0) {
@@ -31,13 +31,15 @@ const search = async (req, res) => {
         });
 
       const allDocuments = await getAllDocuments({
-        documentIds: allDocumentIds,
+        documents: allDocumentIds,
         userId,
       });
+
       const filteredRepositories = getFilteredRepositories({
         allRepositories,
         keywords,
       });
+      
       const filteredDocuments = getFilteredDocuments({
         allDocuments,
         keywords,
@@ -63,14 +65,16 @@ const search = async (req, res) => {
       //we are fetching all the documents from documentIds from all repositories,then
       //we are filtering repositories on the basis of keywords inside keywords array, and
       //we are filtering documnets on the basis of keywords inside keywords array
+      // console.log(userIds.length,keywords.length)
 
       const { allRepositories, allDocumentIds } =
         await getAllRepositoriesAndDocumentIds({
           userIds: [userId],
           userId,
         });
+
       const allDocuments = await getAllDocuments({
-        documentIds: allDocumentIds,
+        documents: allDocumentIds,
         userId,
       });
 
@@ -83,6 +87,7 @@ const search = async (req, res) => {
         allDocuments,
         keywords,
       });
+
 
       return res.status(200).json({
         repositories: filteredRepositories,
